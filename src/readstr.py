@@ -10,8 +10,8 @@ See LICENSE
 import os
 import sys
 
-
 # import other Libs
+from Bio.PDB.PDBParser import PDBParser 
 
 # my modules
 
@@ -19,11 +19,30 @@ import sys
 __author__ = 'Houcemeddine Othman'
 __copyright__ = 'Copyright 2019, AYDA'
 __license__ = 'MIT License'
-__maintainer__ = 'Houcemeddine Othmqn'
+__maintainer__ = 'Houcemeddine Othman'
 __email__ = 'houcemoo@gmail.com'
 __status__ = 'in progress'
 
 
+class PdbRead:
+	"""docstring for PdbReadWrite"""
+	def __init__(self):
+		pass
+		
+	def read_pdb(self, PdbFile):
+		parser = PDBParser( QUIET=True )
+		self.structure = parser.get_structure('S', PdbFile )
+		number_of_models = len(self.structure)
+		first_structure = self.structure[0]
+		self.chain_ids = []
+		for chain in first_structure: 
+			self.chain_ids.append(chain.id)
 
+		return self.structure, self.chain_ids
 
+		
 
+pdb = '../../../6o7g.pdb'
+
+myfile =  PdbRead()
+myfile.read_pdb(pdb)
