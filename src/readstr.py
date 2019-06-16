@@ -15,7 +15,6 @@ from Bio.PDB.PDBParser import PDBParser
 
 # my modules
 
-
 __author__ = 'Houcemeddine Othman'
 __copyright__ = 'Copyright 2019, AYDA'
 __license__ = 'MIT License'
@@ -37,7 +36,9 @@ class PdbRead:
 		self.chain_ids = []
 		for chain in first_structure: 
 			self.chain_ids.append(chain.id)
-
+		print( """Reading structure {0}
+	Number of models: {1} 
+	Number of chains {2}""".format(PdbFile, len(self.structure), len(self.chain_ids)  ) )
 		return self.structure, self.chain_ids
 
 		
