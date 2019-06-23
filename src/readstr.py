@@ -9,6 +9,8 @@ See LICENSE
 # Built-in/Generic Imports
 import os
 import sys
+import shutil
+from zipfile import ZipFile,  is_zipfile
 
 # import other Libs
 from Bio.PDB.PDBParser import PDBParser 
@@ -28,7 +30,7 @@ class PdbRead:
 	def __init__(self):
 		pass
 		
-	def read_pdb(self, PdbFile):
+	def read_pdb(self, PdbFile, verbose=1):
 		parser = PDBParser( QUIET=True )
 		self.structure = parser.get_structure('S', PdbFile )
 		number_of_models = len(self.structure)
@@ -36,14 +38,32 @@ class PdbRead:
 		self.chain_ids = []
 		for chain in first_structure: 
 			self.chain_ids.append(chain.id)
-		print( """Reading structure {0}
+		if verbose == 1 :
+			print( """Reading structure {0}
 	Number of models: {1} 
 	Number of chains {2}""".format(PdbFile, len(self.structure), len(self.chain_ids)  ) )
 		return self.structure, self.chain_ids
+		
+	def read_compressed_pdbs(self, PdbCompressedFiles): 
+		if is_zipfile( PdbCompressedFiles ) :
+			with ZipFile(PdbCompressedFiles, 'r') as zip: 
+				number_of_complexes = len(zip.namelist() )
+				zip.extractall("./.temp") 			
+				try:
+					previous_conformer_chainids = self.read_pdb("./.temp/"+zip.namelist()[0], verbose=0)
+					for name in zip.namelist():
+						pdb_conformer = self.read_pdb("./.temp/"+name, verbose = 0)
+						current_chainids = pdb_conformer[1]
+						if current_chainids == previous_conformer_chainids :
+							previous_conformer_chainids = current_chainids
+						elif current_chainids != previous_conformer_chainids[1]:
+							raise IOError("The ensemble of PDBs is not homogenous ")
+
+				except : 
+					raise IOError("One of the structures is not of PDB type")
+				shutil.rmtree("./.temp")
+
+		else:
+			raise IOError( PdbCompressedFiles, "is not a compressed file")
 
 		
-
-pdb = '../../../6o7g.pdb'
-
-myfile =  PdbRead()
-myfile.read_pdb(pdb)
